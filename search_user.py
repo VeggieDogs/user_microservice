@@ -7,7 +7,7 @@ db_config = {
     'host': 'veggie-dogs-db.czrcm8qnf1xc.us-east-1.rds.amazonaws.com',
     'user': 'admin',
     'password': 'dbuserdbuser',
-    'database': 'user',
+    'database': 'users',
     'port': 3306
 }
 
@@ -42,13 +42,13 @@ def fetch_from_db(query, params=None):
 
 @app.route('/search_user', methods=['GET'])
 def search_user():
-    username = request.args.get('username')
+    user_id = request.args.get('user_id')
     
-    if not username:
-        return jsonify({"error": "Username parameter is required"}), 400
+    if not user_id:
+        return jsonify({"error": "user_id parameter is required"}), 400
 
-    query = "SELECT * FROM User WHERE username LIKE %s"
-    params = (f"%{username}%",)
+    query = "SELECT * FROM Users WHERE user_id LIKE %s"
+    params = (f"%{user_id}%",)
 
     results = fetch_from_db(query, params)
 
