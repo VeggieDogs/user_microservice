@@ -42,13 +42,13 @@ def fetch_from_db(query, params=None):
 
 @app.route('/search_user', methods=['GET'])
 def search_user():
-    user_id = request.args.get('user_id')
+    username = request.args.get('username')
     
-    if not user_id:
-        return jsonify({"error": "user_id parameter is required"}), 400
+    if not username:
+        return jsonify({"error": "username parameter is required"}), 400
 
-    query = "SELECT * FROM Users WHERE user_id LIKE %s"
-    params = (f"%{user_id}%",)
+    query = "SELECT * FROM Users WHERE username LIKE %s"
+    params = (f"%{username}%",)
 
     results = fetch_from_db(query, params)
 
