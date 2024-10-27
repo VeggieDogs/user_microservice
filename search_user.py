@@ -5,6 +5,13 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app, origins="http://localhost:3000", methods=["GET", "POST"])
 
+# db_config = {
+#     'host': 'localhost',
+#     'user': 'root',
+#     'password': 'dbuserdbuser',
+#     'database': 'users',
+#     'port': 3306
+# }
 db_config = {
     'host': 'veggie-dogs-db.czrcm8qnf1xc.us-east-1.rds.amazonaws.com',
     'user': 'admin',
@@ -70,7 +77,38 @@ def search_user():
             "created_at": row[7].strftime('%Y-%m-%d %H:%M:%S')
         })
 
-    return jsonify(result_list), 200
+    return jsonify({"users": result_list}), 200
+
+@app.route('/search_user_by_id', methods=['GET'])
+def search_user_by_id():
+    user_id = request.args.get('user_id')
+    
+    if not user_id:
+        return jsonify({"error": "user_id parameter is required"}), 400
+
+    query = f"SELECT * FROM Users WHERE user_id = {user_id}"
+    params = (f"%{user_id}%",)
+
+    # results = fetch_from_db(query, params)
+    results = fetch_from_db(query)
+
+    if isinstance(results, str):
+        return jsonify({"error": results}), 500
+
+    result_list = []
+    for row in results:
+        result_list.append({
+            "user_id": row[0],
+            "username": row[1],
+            "email": row[2],
+            "first_name": row[3],
+            "last_name": row[4],
+            "phone_number": row[5],
+            "address": row[6],
+            "created_at": row[7].strftime('%Y-%m-%d %H:%M:%S')
+        })
+
+    return jsonify({"users": result_list}), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8888, debug=True)
+    app.run(host='0.0.0.0', port=8889, debug=True)
