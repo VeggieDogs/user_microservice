@@ -1,0 +1,14 @@
+[Unit]
+Description=User MicroService
+After=network.target
+
+[Service]
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/home/ec2-user/userMS
+ExecStart=/bin/bash /home/ec2-user/userMS/start_service.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

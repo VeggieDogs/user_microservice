@@ -41,6 +41,7 @@ def fetch_from_db(query, params=None):
     Returns:
     list: The results of the query execution.
     """
+    conn = None
     try:
         conn = pymysql.connect(**db_config)
         cursor = conn.cursor()
