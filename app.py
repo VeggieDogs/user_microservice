@@ -22,19 +22,12 @@ app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 def serve_openapi_spec():
     return send_from_directory(os.getcwd(), 'openapi.yaml')
 
-# db_config = {
-#     'host': 'localhost',
-#     'user': 'root',
-#     'password': 'dbuserdbuser',
-#     'database': 'users',
-#     'port': 3306
-# }
 db_config = {
-    'host': 'veggie-dogs-db.czrcm8qnf1xc.us-east-1.rds.amazonaws.com',
-    'user': 'admin',
-    'password': 'dbuserdbuser',
-    'database': 'users',
-    'port': 3306
+    'host': os.getenv('DB_HOST'),
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD'),
+    'database': os.getenv('DB_NAME'),
+    'port': int(os.getenv('DB_PORT', 3306))  # Default port is 3306 if not provided
 }
 
 def fetch_from_db(query, params=None):
