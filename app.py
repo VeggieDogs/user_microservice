@@ -3,7 +3,6 @@ import pymysql
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask import Flask, request, jsonify, send_from_directory
-
 import logging
 from datetime import datetime
 
@@ -21,7 +20,6 @@ def before_request_logging():
 def after_request_logging(response):
     duration = datetime.now() - request.start_time
     duration_ms = int(duration.total_seconds() * 1000)
-    
     logging.info(
         f"Completed request: {request.method} {request.path} "
         f"Status: {response.status_code} Duration: {duration_ms}ms"
@@ -52,30 +50,15 @@ db_config = {
 }
 
 def fetch_from_db(query, params=None):
-    """
-    Connects to the database, executes the given query, and returns the result.
-    
-    Parameters:
-    query (str): The SQL query to execute.
-    params (tuple): Parameters to pass into the query (optional).
-    
-    Returns:
-    list: The results of the query execution.
-    """
     conn = None
     try:
         conn = pymysql.connect(**db_config)
         cursor = conn.cursor()
-
         cursor.execute(query, params)
-
         results = cursor.fetchall()
-
         return results
-
     except pymysql.MySQLError as err:
         return f"Error: {err}"
-
     finally:
         if conn:
             cursor.close()
@@ -90,7 +73,6 @@ def search_user():
 
     query = "SELECT * FROM Users WHERE username LIKE %s"
     params = (f"%{username}%",)
-
     results = fetch_from_db(query, params)
 
     if isinstance(results, str):
@@ -106,10 +88,21 @@ def search_user():
             "last_name": row[4],
             "phone_number": row[5],
             "address": row[6],
-            "created_at": row[7].strftime('%Y-%m-%d %H:%M:%S')
+            "created_at": row[7].strftime('%Y-%m-%d %H:%M:%S'),
+            "_links": {
+                "self": {"href": f"/search_user_by_id?user_id={row[0]}"},
+                "search_by_username": {"href": f"/search_user?username={row[1]}"},
+                "all_users": {"href": "/search_user"}
+            }
         })
 
-    return jsonify({"users": result_list}), 200
+    return jsonify({
+        "users": result_list,
+        "_links": {
+            "self": {"href": f"/search_user?username={username}"},
+            "all_users": {"href": "/search_user"}
+        }
+    }), 200
 
 @app.route('/search_user_by_id', methods=['GET'])
 def search_user_by_id():
@@ -118,11 +111,9 @@ def search_user_by_id():
     if not user_id:
         return jsonify({"error": "user_id parameter is required"}), 400
 
-    query = f"SELECT * FROM Users WHERE user_id = {user_id}"
-    params = (f"%{user_id}%",)
-
-    # results = fetch_from_db(query, params)
-    results = fetch_from_db(query)
+    query = "SELECT * FROM Users WHERE user_id = %s"
+    params = (user_id,)
+    results = fetch_from_db(query, params)
 
     if isinstance(results, str):
         return jsonify({"error": results}), 500
@@ -137,10 +128,21 @@ def search_user_by_id():
             "last_name": row[4],
             "phone_number": row[5],
             "address": row[6],
-            "created_at": row[7].strftime('%Y-%m-%d %H:%M:%S')
+            "created_at": row[7].strftime('%Y-%m-%d %H:%M:%S'),
+            "_links": {
+                "self": {"href": f"/search_user_by_id?user_id={row[0]}"},
+                "all_users": {"href": "/search_user"},
+                "search_by_username": {"href": f"/search_user?username={row[1]}"}
+            }
         })
 
-    return jsonify({"users": result_list}), 200
+    return jsonify({
+        "users": result_list,
+        "_links": {
+            "self": {"href": f"/search_user_by_id?user_id={user_id}"},
+            "all_users": {"href": "/search_user"}
+        }
+    }), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8889, debug=True)
