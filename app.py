@@ -5,6 +5,8 @@ from flask_swagger_ui import get_swaggerui_blueprint
 from flask import Flask, request, jsonify, send_from_directory
 import logging
 from datetime import datetime
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app, origins="http://localhost:3000", methods=["GET", "POST"])
@@ -67,12 +69,9 @@ def fetch_from_db(query, params=None):
 @app.route('/search_user', methods=['GET'])
 def search_user():
     username = request.args.get('username')
-    
-    if not username:
-        return jsonify({"error": "username parameter is required"}), 400
 
-    query = "SELECT * FROM Users WHERE username LIKE %s"
-    params = (f"%{username}%",)
+    query = "SELECT * FROM Users WHERE username LIKE %s" if username else "SELECT * FROM Users"
+    params = (f"%{username}%",) if username else None
     results = fetch_from_db(query, params)
 
     if isinstance(results, str):
@@ -143,6 +142,10 @@ def search_user_by_id():
             "all_users": {"href": "/search_user"}
         }
     }), 200
+
+@app.route('/')
+def health_check():
+    return {"status": "User service is up"}, 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8889, debug=True)
