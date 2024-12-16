@@ -22,9 +22,9 @@ The User Microservice is a Python-based service designed to manage user data, pr
    ```
 
 2. **Install Dependencies**:
-  ```bash
-  pip install -r requirements.txt
-  ```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 3. **Start the Service**:
    ```bash
