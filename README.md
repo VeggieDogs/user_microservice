@@ -28,6 +28,6 @@ The User Microservice is a Python-based service designed to manage user data, pr
 
 3. **Start the Service**:
    ```bash
-  ./start_service.sh
-  ```
+   ./start_service.sh
+   ```
 
